@@ -1,2 +1,5 @@
 /venv/
 /data/
+.env
+/api-key/
+service_account.json
