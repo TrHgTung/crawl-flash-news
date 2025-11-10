@@ -1,15 +1,10 @@
-version: "3.8"
+version: "3"
 services:
-  crawler:
+  news-crawler:
     build: .
-    container_name: newsflash-crawler
-    restart: unless-stopped
+    container_name: news_crawler
+    restart: always
+    env_file:
+      - .env
     volumes:
-      - ./data:/data
-    environment:
-      - BASE_URL=https://vi.theblockbeats.news/newsflash
-      - POLL_INTERVAL_SECONDS=300
-      - DB_PATH=sqlite:////data/newsflash.db
-      - USER_AGENT=MyCrawler/1.0 (+youremail@example.com)
-      - LOG_LEVEL=INFO
-      - RUN_ONCE=false
+      - ./service_account.json:/app/service_account.json:ro

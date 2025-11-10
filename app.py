@@ -4,6 +4,8 @@ import gspread
 from google.oauth2.service_account import Credentials
 from dotenv import load_dotenv
 import os
+import schedule
+import time
 
 # lấy biến môi trường từ file .env
 load_dotenv()
@@ -20,25 +22,44 @@ client = gspread.authorize(creds)
 sheet = client.open_by_key(SHEET_ID).sheet1
 
 # crawl datâ
-url = 'https://vi.theblockbeats.news/newsflash'
-response = requests.get(url)
+def crawl_news():
+    # Lấy danh sách title đã có để chống trùng
+    existing_titles = sheet.col_values(1)  # cột A phải là Title: nó sẽ kiểm tra dữ liệu tin tức trong cột A của file Gg sheet
 
-if response.status_code == 200:
-    soup = BeautifulSoup(response.content, 'html.parser')
+    url = 'https://vi.theblockbeats.news/newsflash'
+    response = requests.get(url)
 
-    # Tìm tất cả các khối tin tức
-    news_items = soup.find_all('div', class_='news-flash-wrapper')
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.content, 'html.parser')
 
-    for item in news_items:
-        title = item.find('div', class_='news-flash-title-text')
-        content = item.find('div', class_='news-flash-item-content')
+        # Tìm tất cả các khối tin tức
+        news_items = soup.find_all('div', class_='news-flash-wrapper')
 
-        title_text = title.get_text(strip=True) if title else "No title"
-        content_text = content.get_text(" ", strip=True) if content else "No content"
+        new_count = 0
 
-        print("=== 📰 Tin tức mới ===")
-        print("Tiêu đề:", title_text)
-        print("Nội dung:", content_text)
-        print()
+        for item in news_items:
+            title = item.find('div', class_='news-flash-title-text')
+            content = item.find('div', class_='news-flash-item-content')
 
-        sheet.append_row([title_text, content_text])
+            title_text = title.get_text(strip=True) if title else "Untitled"
+            content_text = content.get_text(" ", strip=True) if content else "No content avalable"
+
+             # kiểm tra chống trùng : bỏ qua bài tin nếu title đã tồn tại trong file gg shêt
+            if title_text in existing_titles:
+                continue
+
+            print("Tiêu đề:", title_text)
+            print("Nội dung:", content_text)
+            print()
+
+            sheet.append_row([title_text, content_text])
+
+# tự đôgnj chạy mỗi 3 tiếng
+schedule.every(3).hours.do(crawl_news)
+
+print("Tryng to crawl new data...")
+crawl_news()  # chạy lần đầu tiên ngay khi start container
+
+while True:
+    schedule.run_pending()
+    time.sleep(60)

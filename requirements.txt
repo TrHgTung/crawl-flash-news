@@ -3,3 +3,4 @@ beautifulsoup4==4.12.2
 gspread
 google-auth
 python-dotenv
+schedule==1.2.1
