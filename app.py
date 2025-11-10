@@ -42,11 +42,15 @@ def crawl_news():
         for item in news_items:
             title = item.find('div', class_='news-flash-title-text')
             content = item.find('div', class_='news-flash-item-content')
+            flag = item.find('img', class_='home-first-dete')
 
             title_text = title.get_text(strip=True) if title else "Không có tiêu đề tin nhanh"
             content_text = content.get_text(" ", strip=True) if content else "Nội dung được tạo bởi NivexHub"
             # nếu nội dung có chứa BlockBeats thì thay bằng NivexHub
             content_text = content_text.replace("BlockBeats", "NivexHub")
+
+            is_featured_news = 1 if flag else 0  # gán cờ featured news
+
             # Lấy thời gian hiện tại (múi giờ Việt Nam)
             vn_tz = pytz.timezone("Asia/Ho_Chi_Minh")
             current_time = datetime.now(vn_tz).strftime("%Y-%m-%d %H:%M:%S")
@@ -58,9 +62,13 @@ def crawl_news():
             print("Tiêu đề:", title_text)
             print("Nội dung:", content_text)
             print("Thời gian:", current_time)
+            print("Featured:", is_featured_news)
             print()
 
-            sheet.append_row([title_text, content_text, current_time])
+            sheet.append_row([title_text, content_text, current_time, is_featured_news])
+            new_count += 1
+
+        print(f"Hoàn thành")
 
 # tự đôgnj chạy mỗi 3 tiếng
 schedule.every(3).hours.do(crawl_news)
