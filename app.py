@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 import os
 import schedule
 import time
+from datetime import datetime
+import pytz  # để dùng múi giờ Việt Nam
 
 # lấy biến môi trường từ file .env
 load_dotenv()
@@ -41,18 +43,24 @@ def crawl_news():
             title = item.find('div', class_='news-flash-title-text')
             content = item.find('div', class_='news-flash-item-content')
 
-            title_text = title.get_text(strip=True) if title else "Untitled"
-            content_text = content.get_text(" ", strip=True) if content else "No content avalable"
+            title_text = title.get_text(strip=True) if title else "Không có tiêu đề tin nhanh"
+            content_text = content.get_text(" ", strip=True) if content else "Nội dung được tạo bởi NivexHub"
+            # nếu nội dung có chứa BlockBeats thì thay bằng NivexHub
+            content_text = content_text.replace("BlockBeats", "NivexHub")
+            # Lấy thời gian hiện tại (múi giờ Việt Nam)
+            vn_tz = pytz.timezone("Asia/Ho_Chi_Minh")
+            current_time = datetime.now(vn_tz).strftime("%Y-%m-%d %H:%M:%S")
 
-             # kiểm tra chống trùng : bỏ qua bài tin nếu title đã tồn tại trong file gg shêt
+            # kiểm tra chống trùng : bỏ qua bài tin nếu title đã tồn tại trong file gg shêt
             if title_text in existing_titles:
                 continue
 
             print("Tiêu đề:", title_text)
             print("Nội dung:", content_text)
+            print("Thời gian:", current_time)
             print()
 
-            sheet.append_row([title_text, content_text])
+            sheet.append_row([title_text, content_text, current_time])
 
 # tự đôgnj chạy mỗi 3 tiếng
 schedule.every(3).hours.do(crawl_news)
