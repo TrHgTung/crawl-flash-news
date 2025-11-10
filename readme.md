@@ -25,7 +25,8 @@
 - Vào Google Drive -> tạo 1 file sheet mới -> Nhấn Chia sẻ -> Thêm email: paste cái client email khi nãy -> Cho phép chỉnh sửa -> Nhấn Xong để cập nhật quyền truy cập file Sheet <br>
 - Copy ID file Sheet, tham khảo: https://stackoverflow.com/questions/36061433/how-do-i-locate-a-google-spreadsheet-id <br>
 - Quay lại source code, tạo 1 file .env, mở file .env , copy code sau và paste vô, xong lưu lại: <br>
-    > SHEET_ID = Id của file Sheet
+    
+``` SHEET_ID = Id của file Sheet```
 
 <h3>2.2/ Build Docker container (nên tìm một dịch vụ VPS rồi setup Docker trên VPS này nha):</h3>
 - Cài đặt Docker:  <br>
